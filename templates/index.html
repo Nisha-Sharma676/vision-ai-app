@@ -1,50 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Azure AI Vision App</title>
 
 <style>
-body {
-  font-family: Arial;
-  background: #f4f6f9;
-  text-align: center;
-  padding: 30px;
+body{
+font-family:Arial;
+background:#f4f6f9;
+text-align:center;
+padding:30px;
 }
 
-.container {
-  width: 60%;
-  margin: auto;
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+.container{
+width:60%;
+margin:auto;
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,.2);
 }
 
-input {
-  width: 80%;
-  padding: 10px;
-  margin: 10px;
+input{
+width:80%;
+padding:10px;
+margin:10px;
 }
 
-button {
-  padding: 10px 20px;
-  background: #0078D4;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
+button{
+padding:10px 20px;
+background:#0078D4;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
 }
 
-pre {
-  text-align: left;
-  background: #eee;
-  padding: 15px;
-  margin-top: 20px;
-  overflow: auto;
-  max-height: 400px;
+pre{
+text-align:left;
+background:#eee;
+padding:15px;
+margin-top:20px;
+overflow:auto;
+max-height:400px;
 }
 </style>
+
 </head>
 
 <body>
@@ -68,38 +69,50 @@ pre {
 </div>
 
 <script>
-async function analyze() {
-  const url = document.getElementById("imgUrl").value;
-  const file = document.getElementById("imgFile").files[0];
 
-  if (file) {
-    const reader = new FileReader();
+async function analyze(){
 
-    reader.onload = async function () {
-      sendData({ image_base64: reader.result });
-    };
+const url=document.getElementById("imgUrl").value;
+const file=document.getElementById("imgFile").files[0];
 
-    reader.readAsDataURL(file);
-  }
-  else if (url) {
-    sendData({ url: url });
-  }
-  else {
-    alert("Please enter URL or upload image");
-  }
+let response;
+
+if(file){
+
+const formData=new FormData();
+formData.append("image",file);
+
+response=await fetch("/analyze-file",{
+method:"POST",
+body:formData
+});
+
+}
+else if(url){
+
+response=await fetch("/analyze",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({url:url})
+});
+
+}
+else{
+
+alert("Please upload image or enter URL");
+return;
+
 }
 
-async function sendData(body) {
-  const res = await fetch("/analyze", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(body)
-  });
+const data=await response.json();
 
-  const data = await res.json();
-  document.getElementById("output").textContent =
-    JSON.stringify(data, null, 2);
+document.getElementById("output").textContent=
+JSON.stringify(data,null,2);
+
 }
+
 </script>
 
 </body>
