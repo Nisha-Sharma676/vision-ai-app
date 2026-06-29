@@ -1,6 +1,5 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import os, requests
-import base64
 
 app = Flask(__name__)
 
@@ -16,27 +15,24 @@ headers = {
 
 @app.route("/")
 def home():
-    return "Vision AI App Running"
+    return render_template("index.html")   # ✅ FIX HERE
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.json
 
-    # CASE 1: URL
     if "url" in data:
         body = {"url": data["url"]}
 
-    # CASE 2: Base64 image
     elif "image_base64" in data:
         image_data = data["image_base64"].split(",")[1]
         body = {"data": image_data}
 
     else:
-        return jsonify({"error": "No valid input provided"})
+        return jsonify({"error": "No input"})
 
     response = requests.post(URL, headers=headers, json=body)
 
     return jsonify(response.json())
 
-# Vercel requirement
 app = app
